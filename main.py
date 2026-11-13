@@ -1,26 +1,25 @@
 import json,os,urllib.request as u
 V=[0,100,320,330,500,900,0]
-M=-100001
+M=-99999
 C=[0,0,6,4,0,2,-2]
 N=[33,31,18,14,-14,-18,-31,-33];D=[15,17,-15,-17];T=[1,-1,16,-16];G=T+D;R=(5,4,3,2);H=[0,0,N,D,T,G,G]
 K=[15]*128;K[0]=13;K[7]=14;K[4]=12;K[112]=7;K[119]=11;K[116]=3
-B=[0]*128;Q=[0,15,-1,0];J=[-1,-1];U=[];W=[0]
+B=[0]*128;Q=[0,15,-1,0];J=[-1,-1];U=[];W=[0];TT={}
 def X(p,q):
- t=p&7;c=p>>3;r=q>>4;f=q&7;a=r+7*c-2*r*c
+ t=p&7;c=p>>3;r=q>>4;f=q&7;a=r^7*c
  return(V[t]+(a*a if t==1 else(min(f,7-f)+min(r,7-r))*C[t]))*(1-2*c)
+def CK():
+ W[0]+=1
+ if W[0]>1.5e5:raise Exception
 def ST():
  B[:]=[0]*128;Q[:]=0,15,-1,0;J[:]=4,116;del U[:]
- for f,q in enumerate(map(int,"42356324")):
-  B[f]=q;B[112+f]=q+8;B[16+f]=1;B[96+f]=9
+ B[0:8]=[4,2,3,5,6,3,2,4];B[16:24]=[1]*8;B[96:104]=[9]*8;B[112:120]=[12,10,11,13,14,11,10,12]
 def AT(q,y):
- b=B;e=y<<3
- for d in((-15,-17),(15,17))[y]:
-  t=q+d
-  if not t&0x88 and b[t]==(1|e):return 1
- for p in(2,3,4,6):
+ b=B;e=y<<3;H[1]=((-15,-17),(15,17))[y]
+ for p in(1,2,3,4,6):
   for g in H[p]:
    t=q+g
-   for _ in range(7 if 2<p<6 else 1):
+   for _ in range(1+(p in(3,4))*6):
     if t&0x88:break
     v=b[t]
     if v:
@@ -35,15 +34,13 @@ def CS(o):
   if Q[1]&(b<<(v*2))and not any(B[a+x]for x in e)and not any(AT(a+x,w)for x in e[:2]):o.append(k|((a+t)<<7)|(1<<19))
 def GN(c=0):
  b=B;v=Q[0];w=v^1;o=[];d=16-32*v
- for f in range(128):
-  p=b[f]
+ for f,p in enumerate(B):
   if f&0x88 or not p or(p>>3)!=v:continue
   y=p&7
   if y==1:
    r=f>>4;e=f+d
    if not b[e]:
-    if r==6-5*v:
-     for q in R:o.append(f|(e<<7)|(q<<14))
+    if r==6-5*v:o+=[f|(e<<7)|(q<<14)for q in R]
     elif not c:
      o.append(f|(e<<7))
      if r==1+5*v and not b[e+d]:o.append(f|((e+d)<<7)|(1<<20))
@@ -52,19 +49,21 @@ def GN(c=0):
     if q&0x88:continue
     x=b[q]
     if x and(x>>3)==w:
-     if r==6-5*v:
-      for j in R:o.append(f|(q<<7)|(j<<14)|(1<<17))
+     if r==6-5*v:o+=[f|(q<<7)|(j<<14)|(1<<17)for j in R]
      else:o.append(f|(q<<7)|(1<<17))
     elif q==Q[2]:o.append(f|(q<<7)|(3<<17))
    continue
   for g in H[y]:
    q=f
-   for _ in range(7 if 2<y<6 else 1):
+   while 1:
     q+=g
     if q&0x88:break
     x=b[q]
-    if not x and not c or x and(x>>3)==w:o.append(f|(q<<7)|((x!=0)<<17))
-    if x:break
+    if x:
+     if(x>>3)==w:o.append(f|(q<<7)|(1<<17))
+     break
+    if not c:o.append(f|(q<<7))
+    if y in(2,6):break
  if not c:CS(o)
  return o
 def MK(m):
@@ -77,33 +76,31 @@ def MK(m):
  w=j|v<<3 if j else p;b[t]=w;Q[3]+=X(w,t)
  if p&7==6:J[v]=t
  if g&4:
-  e=f+3 if t>f else f-4;k=e-2 if t>f else e+3;r=b[e];Q[3]+=X(r,k)-X(r,e);b[e]=0;b[k]=r
+  e,k=(f+3,f+1)if t>f else(f-4,f-1);r=b[e];Q[3]+=X(r,k)-X(r,e);b[e]=0;b[k]=r
  Q[1]&=K[f]&K[t];Q[2]=-1
  if g&8:
-  e=(f+t)//2;a=e&7;y=(1|(v^1)<<3)
-  if(a and b[t-1]==y)or(a<7 and b[t+1]==y):Q[2]=e
+  e=(f+t)//2;a=e&7;y=9-8*v
+  if(b[t-1]==y and a)or(b[t+1]==y and a<7):Q[2]=e
  Q[0]^=1
  if AT(J[v],v^1):UM();return 0
  return 1
 def UM():
  m,z,s,a,e,w=U.pop();f=m&127;t=(m>>7)&127;j=(m>>14)&7;g=m>>17;v=Q[0]^1;o=1|v<<3 if j else B[t];B[t]=0
  if g&4:
-  a2=f+3 if t>f else f-4;k=a2-2 if t>f else a2+3;B[a2]=B[k];B[k]=0
+  k,c=(f+1,f+3)if t>f else(f-1,f-4);B[c]=B[k];B[k]=0
  B[f]=o
  if o&7==6:J[v]=f
  if z:B[s]=z
  Q[0]=v;Q[1]=a;Q[2]=e;Q[3]=w
-def OD(o):
- return sorted(o,key=lambda m:-((999+V[(m>>14)&7])if(m>>14)&7 else(99+10*V[(B[(m>>7)&127]&7)or 1]-V[B[m&127]&7])if m>>17&1 else 0))
+def OD(o,t=0):
+ return sorted(o,key=lambda m:-(1000000 if m==t else(99+10*V[(B[(m>>7)&127]&7)or 1]-V[B[m&127]&7])if m>>17&1 else 0))
 def QS(a,b,y):
- W[0]+=1
- if W[0]>99999:raise Exception
+ CK()
  e=Q[3]*(1-2*Q[0])
  c=AT(J[Q[0]],Q[0]^1);s2=M+1+y
  if not c:
   if e>=b:return e
   s2=e
-  a=max(a,e)
  o=OD(GN(not c))
  for m in o:
   if not MK(m):continue
@@ -115,17 +112,21 @@ def QS(a,b,y):
  return s2
 def NM(d,a,b,y):
  if d<=0:return QS(a,b,y)
- W[0]+=1
- if W[0]>99999:raise Exception
- o=OD(GN());s2=M
+ k=bytes(B+[Q[0],Q[1],Q[2]+1]);t=0;e=TT.get(k)
+ if e:
+  if e[0]>=d:return e[1]
+  t=e[2]
+ CK()
+ a0=a;o=OD(GN(),t);s2=M;bm=0
  for m in o:
   if not MK(m):continue
   s=-NM(d-1,-b,-a,y+1)
   UM()
-  s2=max(s2,s)
+  if s>s2:s2=s;bm=m
   a=max(a,s)
   if a>=b:break
- if s2==M:return M+1+y if AT(J[Q[0]],Q[0]^1) else 0
+ if s2==M:return(M+1+y)*AT(J[Q[0]],Q[0]^1)
+ if a0<s2<b and abs(s2)<9e4:TT[k]=(d,s2,bm)
  return s2
 def RT():
  o=[m for m in GN() if MK(m) and not UM()]
@@ -139,11 +140,11 @@ def RT():
  return bm
 def UC(m):
  f=m&127;t=(m>>7)&127;j=(m>>14)&7
- s=chr(97+(f&7))+str((f>>4)+1)+chr(97+(t&7))+str((t>>4)+1)
+ s="%c%d%c%d"%(97+(f&7),(f>>4)+1,97+(t&7),(t>>4)+1)
  if j:s+='nbrq'[j-2]
  return s
 def CH(mv):
- ST()
+ ST();TT.clear()
  for s in mv:
   if not(m:=next((x for x in GN() if UC(x)==s),None)):break
   MK(m)
