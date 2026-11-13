@@ -55,7 +55,7 @@ def GN(c=0):
      if r==6-5*v:
       for j in R:o.append(f|(q<<7)|(j<<14)|(1<<17))
      else:o.append(f|(q<<7)|(1<<17))
-    elif q==Q[2]:o.append(f|(q<<7)|(1<<17)|(1<<18))
+    elif q==Q[2]:o.append(f|(q<<7)|(3<<17))
    continue
   for g in H[y]:
    q=f
@@ -99,7 +99,7 @@ def QS(a,b,y):
  W[0]+=1
  if W[0]>99999:raise Exception
  e=Q[3]*(1-2*Q[0])
- c=AT(J[Q[0]],Q[0]^1);s2=M
+ c=AT(J[Q[0]],Q[0]^1);s2=M+1+y
  if not c:
   if e>=b:return e
   s2=e
@@ -129,10 +129,9 @@ def NM(d,a,b,y):
  return s2
 def RT():
  o=[m for m in GN() if MK(m) and not UM()]
- o=OD(o);bm=o[0];W[0]=0
+ o=OD(o);bm=o[0];W[0]=0;a=M
  try:
   for d in range(8):
-   a=M
    for m in o:
     MK(m);s=-NM(d,M,-a,1);UM()
     if s>a:a=s;bm=m
